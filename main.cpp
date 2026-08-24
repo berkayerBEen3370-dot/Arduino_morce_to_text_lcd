@@ -1,0 +1,160 @@
+#include <LiquidCrystal_I2C.h>
+
+#include <Arduino.h>
+
+#define button_1 2
+#define button_2 3
+#define led_red 4
+#define led_blue 5
+
+String txt="";
+String write="";
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+struct alphabet {
+  char morce[6];
+  char alpha;
+};
+alphabet myalp[36]{
+  { ".-", 'a' },
+  { "-...", 'b' },
+  { "-.-.", 'c' },
+  { "-..", 'd' },
+  { ".", 'e' },
+  { "..-.", 'f' },
+  { "--.", 'g' },
+  { "....", 'h' },
+  { "..", 'i' },
+  { ".---", 'j' },
+  { "-.-", 'k' },
+  { ".-..", 'l' },
+  { "--", 'm' },
+  { "-.", 'n' },
+  { "---", 'o' },
+  { ".--.", 'p' },
+  { "--.-", 'q' },
+  { ".-.", 'r' },
+  { "...", 's' },
+  { "-", 't' },
+  { "..-", 'u' },
+  { "...-", 'v' },
+  { ".--", 'w' },
+  { "-..-", 'x' },
+  { "-.--", 'y' },
+  { "--..", 'z' },
+  { ".----", '1' },
+  { "..---", '2' },
+  { "...--", '3' },
+  { "....-", '4' },
+  { ".....", '5' },
+  { "-....", '6' },
+  { "--...", '7' },
+  { "---..", '8' },
+  { "----.", '9' },
+  { "-----", '0' },
+};
+
+unsigned long int now_time = 0;
+unsigned long int past_time = 0;
+
+char morcetochar(const String& morc) {
+  for (int i = 0; i < 36; i++) {
+    if (morc == myalp[i].morce) {
+      return myalp[i].alpha;
+    }
+  }
+  return '?';
+}
+
+void setup() {
+
+
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.noBlink();
+  lcd.cursor();
+  pinMode(button_1, INPUT_PULLUP);
+  pinMode(button_2, INPUT_PULLUP);
+  pinMode(led_red, OUTPUT);
+  pinMode(led_blue, OUTPUT);
+  lcd.clear();
+  lcd.print("Added: ");
+  lcd.print(txt);
+  lcd.print(" Text: ");
+  lcd.setCursor(0, 1);
+  lcd.print(write);
+}
+
+void loop() {
+  now_time = millis();
+  bool isbutton_long = digitalRead(button_1);
+  bool isbutton_short = digitalRead(button_2);
+  delay(100);
+  if (digitalRead(button_1) == 0 && digitalRead(button_2) == 0) {
+    txt = "";
+    write = "";
+    lcd.clear();
+    lcd.print("Added: ");
+    lcd.print(txt);
+    lcd.print(" Text: ");
+    lcd.setCursor(0, 1);
+    lcd.print(write);
+
+    while (digitalRead(button_1) == 0 || digitalRead(button_2) == 0)
+      ;
+  }
+
+  if (isbutton_long == 1 && isbutton_short == 1) {
+    if (now_time - past_time > 1000 && txt != "") {
+      digitalWrite(led_blue, 1);
+      digitalWrite(led_red, 1);
+      past_time = now_time;
+      write += morcetochar(txt);
+      lcd.clear();
+      lcd.print("Added: ");
+      lcd.print(txt);
+      lcd.print("Text: ");
+      lcd.setCursor(0, 1);
+      lcd.print(write);
+      txt = "";
+      delay(150);
+      digitalWrite(led_blue, 0);
+      digitalWrite(led_red, 0);
+    }
+  } else if (isbutton_long == 0) {
+    delay(30);
+    txt += "-";
+    digitalWrite(led_red, 1);
+    digitalWrite(led_blue, 0);
+    while (digitalRead(button_1) == 0) {
+      delay(10);
+      if (digitalRead(button_1)) {
+        digitalWrite(led_blue, 0);
+        digitalWrite(led_red, 0);
+        break;
+      }
+    }
+    digitalWrite(led_blue, 0);
+    digitalWrite(led_red, 0);
+    delay(20);
+    past_time = millis();
+
+
+  } else if (isbutton_short == 0) {
+    txt += ".";
+    digitalWrite(led_blue, 1);
+    digitalWrite(led_red, 0);
+    while (digitalRead(button_2) == 0) {
+      delay(10);
+      if (digitalRead(button_2)) {
+        digitalWrite(led_blue, 0);
+        digitalWrite(led_red, 0);
+        break;
+      }
+    }
+    digitalWrite(led_blue, 0);
+    digitalWrite(led_red, 0);
+    delay(20);
+    past_time = millis();
+  }
+}
