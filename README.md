@@ -15,6 +15,6 @@ This project is an Arduino application that continuously decodes Morse code (dot
 - Arduino Uno
 - 16x2 I2C LCD Screen
 - 2x Push Button
-- 1x RGB led
+- 1x common catode RGB led
 - 2x 220Ω Resistors
 - Some jumper wires
