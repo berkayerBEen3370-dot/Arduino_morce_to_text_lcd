@@ -17,4 +17,4 @@ This project is an Arduino application that continuously decodes Morse code (dot
 - 2x Push Button
 - 1x common catode RGB led
 - 2x 220Ω Resistors
-- Some jumper wires
+- 12 jumper wires
